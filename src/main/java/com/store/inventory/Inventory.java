@@ -24,13 +24,12 @@ public final class Inventory {
     }
 
     public static InventoryService create(Clock clock, StockAlertListener alertListener) {
-        StockRepository stockRepository = new InMemoryStockRepository();
+        StockRepository stockRepository = new InMemoryStockRepository(alertListener);
         ReservationRepository reservationRepository = new InMemoryReservationRepository();
         CategoryRules categoryRules = CategoryRules.defaults();
         ReleaseExpiredReservations releaseExpiredReservations = new ReleaseExpiredReservations(clock, stockRepository, reservationRepository);
 
         return new DefaultInventoryService(
-            alertListener,
             stockRepository,
             new ReserveUnits(clock, categoryRules, stockRepository, reservationRepository, releaseExpiredReservations),
             new ConfirmReservation(clock, stockRepository, reservationRepository, releaseExpiredReservations),
