@@ -2,6 +2,7 @@ package com.store.inventory.adapter;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.store.inventory.api.Reservation;
@@ -12,10 +13,25 @@ public class InMemoryReservationRepository implements ReservationRepository {
     private final ConcurrentHashMap<String, TrackedReservation> byOrderId = new ConcurrentHashMap<>();
 
     @Override
-    public void save(Reservation reservation) {
-        byOrderId.put(reservation.orderId(), new TrackedReservation(reservation));
+    public Optional<Reservation> activeReservationFor(String orderId) {
+        TrackedReservation tracked = byOrderId.get(orderId);
+        if (tracked == null || tracked.status() != ReservationStatus.ACTIVE) {
+            return Optional.empty();
+        }
+        return Optional.of(tracked.reservation());
     }
-
+    
+    @Override
+    public Reservation saveIfAbsent(Reservation candidate) {
+        TrackedReservation installed = byOrderId.compute(candidate.orderId(), (orderId, existing) -> {
+            if (existing != null && existing.status() == ReservationStatus.ACTIVE) {
+                return existing;
+            }
+            return new TrackedReservation(candidate);
+        });
+        return installed.reservation();
+    }
+    
     @Override
     public Reservation confirm(String orderId, Instant now) {
         TrackedReservation tracked = byOrderId.get(orderId);
