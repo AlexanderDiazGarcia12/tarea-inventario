@@ -1,0 +1,25 @@
+-------------------------------------------------------------------------------
+Test set: com.store.inventory.ReserveOrderTest
+-------------------------------------------------------------------------------
+Tests run: 10, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.030 s <<< FAILURE! -- in com.store.inventory.ReserveOrderTest
+com.store.inventory.ReserveOrderTest.productoDesconocidoFallaComoStockInsuficiente -- Time elapsed: 0.010 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <com.store.inventory.api.InsufficientStockException> but was: <java.lang.NullPointerException>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3115)
+	at com.store.inventory.ReserveOrderTest.productoDesconocidoFallaComoStockInsuficiente(ReserveOrderTest.java:48)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.NullPointerException: Cannot invoke "Object.hashCode()" because "pk" is null
+	at java.base/java.util.ImmutableCollections$MapN.probe(ImmutableCollections.java:1328)
+	at java.base/java.util.ImmutableCollections$MapN.get(ImmutableCollections.java:1242)
+	at com.store.inventory.domain.rules.CategoryRules.ruleFor(CategoryRules.java:24)
+	at com.store.inventory.usecase.ReserveUnits.enforceOrderLimit(ReserveUnits.java:65)
+	at com.store.inventory.usecase.ReserveUnits.reserve(ReserveUnits.java:45)
+	at com.store.inventory.service.DefaultInventoryService.reserve(DefaultInventoryService.java:44)
+	at com.store.inventory.ReserveOrderTest.lambda$productoDesconocidoFallaComoStockInsuficiente$2(ReserveOrderTest.java:49)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	... 6 more
+

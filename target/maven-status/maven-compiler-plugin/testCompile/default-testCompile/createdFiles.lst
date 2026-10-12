@@ -1,0 +1,5 @@
+com/store/inventory/RetryIdempotencyTest.class
+com/store/inventory/MutableClock.class
+com/store/inventory/ReservationExpirationTest.class
+com/store/inventory/ReserveOrderTest.class
+com/store/inventory/InventoryServiceTest.class
