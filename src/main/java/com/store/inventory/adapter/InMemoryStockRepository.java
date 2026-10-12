@@ -63,6 +63,11 @@ public class InMemoryStockRepository implements StockRepository {
         products.get(sku).confirm(quantity);
     }
 
+    @Override
+    public void releaseUnits(String sku, int quantity) {
+        products.get(sku).release(quantity);
+    }
+
     private void requireNonBlank(String value, String fieldName) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(fieldName + " is required");

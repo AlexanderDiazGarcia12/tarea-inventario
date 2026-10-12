@@ -30,7 +30,7 @@ public class ProductStock {
     }
 
     synchronized boolean tryReserve(int quantity) {
-        if (quantity <= available()) {
+        if (quantity > available()) {
             return false;
         }
         reservedUnits += quantity;
@@ -40,6 +40,10 @@ public class ProductStock {
     synchronized void confirm(int quantity) {
         reservedUnits -= quantity;
         soldUnits += quantity;
+    }
+
+    synchronized void release(int quantity) {
+        reservedUnits -= quantity;
     }
 
 }

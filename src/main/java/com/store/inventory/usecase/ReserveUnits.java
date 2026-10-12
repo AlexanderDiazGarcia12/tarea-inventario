@@ -11,18 +11,20 @@ import com.store.inventory.domain.rules.CategoryRules;
 import com.store.inventory.port.ReservationRepository;
 import com.store.inventory.port.StockRepository;
 
-public class ReserveUnits {
+public final class ReserveUnits {
 
     private final Clock clock;
     private final CategoryRules categoryRules;
     private final StockRepository stockRepository;
     private final ReservationRepository reservationRepository;
+    private final ReleaseExpiredReservations releaseExpiredReservations;
 
-    public ReserveUnits(Clock clock, CategoryRules categoryRules, StockRepository stockRepository, ReservationRepository reservationRepository) {
+    public ReserveUnits(Clock clock, CategoryRules categoryRules, StockRepository stockRepository, ReservationRepository reservationRepository, ReleaseExpiredReservations releaseExpiredReservations) {
         this.clock = clock;
         this.categoryRules = categoryRules;
         this.stockRepository = stockRepository;
         this.reservationRepository = reservationRepository;
+        this.releaseExpiredReservations = releaseExpiredReservations;
     }
 
     public Reservation reserve(String orderId, String sku, int quantity) {
@@ -30,12 +32,17 @@ public class ReserveUnits {
         requireNonBlank(sku, "sku");
         requirePositiveQuantity(quantity);
 
+        Instant now = clock.instant();
+        releaseExpiredReservations.releaseDueAt(now);
+
         ProductCategory category = stockRepository.categoryOf(sku);
         if (category != null) {
             enforceOrderLimit(sku, category, quantity);
         }
+        
         stockRepository.reserveUnits(sku, quantity);
-        Instant expiresAt = clock.instant().plus(categoryRules.ruleFor(category).timeToPay());
+
+        Instant expiresAt = now.plus(categoryRules.ruleFor(category).timeToPay());
         Reservation reservation = new Reservation(orderId, sku, quantity, expiresAt);
         reservationRepository.save(reservation);
         return reservation;

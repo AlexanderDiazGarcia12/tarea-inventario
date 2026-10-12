@@ -1,15 +1,18 @@
 package com.store.inventory.adapter;
 
+import java.time.Instant;
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.store.inventory.api.Reservation;
+import com.store.inventory.domain.reservation.ReservationExpiry;
 
 final class TrackedReservation {
 
     private final Reservation reservation;
-    private volatile ReservationStatus status;
+    private final AtomicReference<ReservationStatus> status = new AtomicReference<>(ReservationStatus.ACTIVE);
 
     TrackedReservation(Reservation reservation) {
         this.reservation = reservation;
-        this.status = ReservationStatus.ACTIVE;
     }
 
     Reservation reservation() {
@@ -17,11 +20,18 @@ final class TrackedReservation {
     }
 
     ReservationStatus status() {
-        return status;
+        return status.get();
     }
 
-    void markConfirmed() {
-        this.status = ReservationStatus.CONFIRMED;
+    boolean hasExpiredAt(Instant now) {
+        return ReservationExpiry.hasExpired(reservation, now);
     }
 
+    boolean confirm() {
+        return status.compareAndSet(ReservationStatus.ACTIVE, ReservationStatus.CONFIRMED);
+    }
+
+    boolean expireIfDueAt(Instant now) {
+        return hasExpiredAt(now) && status.compareAndSet(ReservationStatus.ACTIVE, ReservationStatus.EXPIRED);
+    }
 }

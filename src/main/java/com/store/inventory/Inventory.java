@@ -9,6 +9,7 @@ import com.store.inventory.port.ReservationRepository;
 import com.store.inventory.port.StockRepository;
 import com.store.inventory.service.DefaultInventoryService;
 import com.store.inventory.usecase.ConfirmReservation;
+import com.store.inventory.usecase.ReleaseExpiredReservations;
 import com.store.inventory.usecase.ReserveUnits;
 
 import java.time.Clock;
@@ -26,11 +27,13 @@ public final class Inventory {
         StockRepository stockRepository = new InMemoryStockRepository();
         ReservationRepository reservationRepository = new InMemoryReservationRepository();
         CategoryRules categoryRules = CategoryRules.defaults();
+        ReleaseExpiredReservations releaseExpiredReservations = new ReleaseExpiredReservations(clock, stockRepository, reservationRepository);
 
         return new DefaultInventoryService(
             alertListener,
             stockRepository,
-            new ReserveUnits(clock, categoryRules, stockRepository, reservationRepository),
-            new ConfirmReservation(stockRepository, reservationRepository));
+            new ReserveUnits(clock, categoryRules, stockRepository, reservationRepository, releaseExpiredReservations),
+            new ConfirmReservation(clock, stockRepository, reservationRepository, releaseExpiredReservations),
+            releaseExpiredReservations);
     }
 }
