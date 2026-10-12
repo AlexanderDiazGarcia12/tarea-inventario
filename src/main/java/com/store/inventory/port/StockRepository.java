@@ -10,4 +10,5 @@ public interface StockRepository {
     ProductCategory categoryOf(String sku);
     void reserveUnits(String sku, int quantity);
     void confirmUnits(String sku, int quantity);
+    void releaseUnits(String sku, int quantity);
 }

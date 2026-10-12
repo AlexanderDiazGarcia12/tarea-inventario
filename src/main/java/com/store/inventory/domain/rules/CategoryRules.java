@@ -14,9 +14,9 @@ public final class CategoryRules {
 
     public static CategoryRules defaults() {
         return new CategoryRules(Map.of(
-            ProductCategory.STANDARD, CategoryRule.unlimited(Duration.ofHours(15)),
+            ProductCategory.STANDARD, CategoryRule.unlimited(Duration.ofMinutes(15)),
             ProductCategory.PRE_ORDER, CategoryRule.unlimited(Duration.ofHours(24)),
-            ProductCategory.FLASH_SALE, CategoryRule.withOrderLimit(Duration.ofHours(5), 2)
+            ProductCategory.FLASH_SALE, CategoryRule.withOrderLimit(Duration.ofMinutes(5), 2)
         ));
     }
 
