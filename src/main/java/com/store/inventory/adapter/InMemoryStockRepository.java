@@ -4,11 +4,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.store.inventory.api.InsufficientStockException;
 import com.store.inventory.api.ProductCategory;
+import com.store.inventory.api.StockAlertListener;
 import com.store.inventory.port.StockRepository;
 
 public class InMemoryStockRepository implements StockRepository {
     
     private final ConcurrentHashMap<String, ProductStock> products = new ConcurrentHashMap<>();
+    private final LowStockAlerter lowStockAlerter;
+
+    public InMemoryStockRepository(StockAlertListener listener) {
+        this.lowStockAlerter = new LowStockAlerter(listener);
+    }
 
     @Override
     public void registerProduct(String sku, ProductCategory category) {
@@ -33,6 +39,7 @@ public class InMemoryStockRepository implements StockRepository {
             throw new IllegalStateException("Product not registered: " + sku);
         }
         stock.addPhysicalUnits(quantity);
+        notifyAvailabilityChange(sku, stock);
     }
 
     @Override
@@ -56,6 +63,7 @@ public class InMemoryStockRepository implements StockRepository {
         if (!stock.tryReserve(quantity)) {
             throw new InsufficientStockException(sku, quantity, stock.available());
         }
+        notifyAvailabilityChange(sku, stock);
     }
 
     @Override
@@ -65,7 +73,13 @@ public class InMemoryStockRepository implements StockRepository {
 
     @Override
     public void releaseUnits(String sku, int quantity) {
-        products.get(sku).release(quantity);
+        ProductStock stock = products.get(sku);
+        stock.release(quantity);
+        notifyAvailabilityChange(sku, stock);
+    }
+
+    private void notifyAvailabilityChange(String sku, ProductStock stock) {
+        lowStockAlerter.afterAvailabilityChange(sku, stock.available());
     }
 
     private void requireNonBlank(String value, String fieldName) {
